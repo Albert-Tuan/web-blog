@@ -4,12 +4,14 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <p>📔 <strong>Nhật Ký Lập Trình</strong></p>
+        <p className="footer-logo">📔 Nhật Ký Lập Trình</p>
         <p>Một hành trình tự học, chia sẻ và phát triển</p>
-        <p className="mb-sm">
+        <p>
           Made with 💚 by <a href="https://github.com/Albert-Tuan" target="_blank" rel="noopener noreferrer">Albert-Tuan</a>
         </p>
-        <p>&copy; {currentYear} - All rights reserved</p>
+        <p className="footer-copyright">
+          &copy; {currentYear} - All rights reserved
+        </p>
       </div>
     </footer>
   );

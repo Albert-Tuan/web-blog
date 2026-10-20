@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import PostCard from '../components/PostCard';
 
 // Sample blog posts data
@@ -83,54 +81,52 @@ function Blog() {
     : allPosts;
 
   return (
-    <>
-      <Header />
-      
-      <main className="main-content">
-        <div className="container">
-          <section className="page-header">
-            <h1>📝 Tất cả bài viết</h1>
-            <p>{allPosts.length} bài viết • Cập nhật liên tục</p>
-          </section>
+    <main className="main-content">
+      <div className="container">
+        <section className="page-header">
+          <h1>📝 Tất cả bài viết</h1>
+          <p className="subtitle">{allPosts.length} bài viết • Cập nhật liên tục</p>
+        </section>
 
-          {/* Tag Filter */}
-          <div className="tags-cloud mb-xl">
-            <button 
-              className={`tag-item ${!selectedTag ? 'active' : ''}`}
-              onClick={() => setSelectedTag(null)}
+        {/* Tag Filter */}
+        <div className="tags-cloud mb-xl fade-in">
+          <button 
+            className={`tag-item ${!selectedTag ? 'active' : ''}`}
+            onClick={() => setSelectedTag(null)}
+            style={{
+              background: !selectedTag ? 'var(--primary-container)' : undefined,
+              color: !selectedTag ? 'var(--on-primary-container)' : undefined
+            }}
+          >
+            Tất cả
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              className={`tag-item ${selectedTag === tag ? 'active' : ''}`}
+              onClick={() => setSelectedTag(tag)}
+              style={{
+                background: selectedTag === tag ? 'var(--primary-container)' : undefined,
+                color: selectedTag === tag ? 'var(--on-primary-container)' : undefined
+              }}
             >
-              Tất cả
+              {tag}
             </button>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                className={`tag-item ${selectedTag === tag ? 'active' : ''}`}
-                onClick={() => setSelectedTag(tag)}
-                style={{
-                  background: selectedTag === tag ? 'var(--color-brown)' : '',
-                  color: selectedTag === tag ? 'var(--color-cream)' : ''
-                }}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-
-          {/* Posts Grid */}
-          <div className="blog-grid">
-            {filteredPosts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-
-          {filteredPosts.length === 0 && (
-            <p className="text-center">Không có bài viết nào với tag này.</p>
-          )}
+          ))}
         </div>
-      </main>
-      
-      <Footer />
-    </>
+
+        {/* Posts Grid */}
+        <div className="blog-grid">
+          {filteredPosts.map(post => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+
+        {filteredPosts.length === 0 && (
+          <p className="text-center">Không có bài viết nào với tag này.</p>
+        )}
+      </div>
+    </main>
   );
 }
 

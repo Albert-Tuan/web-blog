@@ -5,11 +5,14 @@ import Blog from './pages/Blog';
 import Tags from './pages/Tags';
 import Contact from './pages/Contact';
 import PostDetail from './pages/PostDetail';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import './index.css';
 
 function App() {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         {/* Home page - http://localhost:5173/ */}
         <Route path="/" element={<Home />} />
@@ -42,6 +45,7 @@ function App() {
           </div>
         } />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

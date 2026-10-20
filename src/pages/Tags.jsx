@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
 // Sample tags with counts
 const tagsData = [
@@ -39,34 +37,33 @@ function Tags() {
   const sortedTags = [...tagsData].sort((a, b) => b.count - a.count);
 
   return (
-    <>
-      <Header />
-      
-      <main className="main-content">
-        <div className="container">
-          <section className="page-header">
-            <h1>🏷️ Tags</h1>
-            <p>Tất cả chủ đề được sử dụng trong blog</p>
-          </section>
+    <main className="main-content">
+      <div className="container">
+        <section className="page-header">
+          <h1>🏷️ Tags</h1>
+          <p className="subtitle">Tất cả chủ đề được sử dụng trong blog</p>
+        </section>
 
-          <div className="tags-cloud mb-xl">
-            {sortedTags.map(tag => (
-              <Link 
-                key={tag.name} 
-                to={`/blog?tag=${tag.name}`}
-                className="tag-item"
-              >
-                {tag.name} <span className="count">({tag.count})</span>
-              </Link>
-            ))}
-          </div>
+        {/* All tags cloud */}
+        <div className="tags-cloud mb-xl fade-in">
+          {sortedTags.map(tag => (
+            <Link 
+              key={tag.name} 
+              to={`/blog?tag=${tag.name}`}
+              className="tag-item"
+            >
+              {tag.name} <span className="count">({tag.count})</span>
+            </Link>
+          ))}
+        </div>
 
-          {/* Tags by category */}
-          <section className="about-content mb-xl">
-            <h2>📂 Tags theo danh mục</h2>
-            
+        {/* Tags by category */}
+        <section className="about-content fade-in">
+          <h2>📂 Tags theo danh mục</h2>
+          
+          <div className="tags-category">
             <h3>Công nghệ</h3>
-            <div className="tags-cloud" style={{ marginBottom: '1.5rem' }}>
+            <div className="tags-cloud" style={{ marginBottom: '1.5rem', background: 'transparent', border: 'none', padding: 0 }}>
               {['React', 'JavaScript', 'Node.js', 'Python', 'TypeScript'].map(tag => (
                 <Link 
                   key={tag} 
@@ -77,9 +74,11 @@ function Tags() {
                 </Link>
               ))}
             </div>
+          </div>
 
+          <div className="tags-category">
             <h3>Công cụ</h3>
-            <div className="tags-cloud" style={{ marginBottom: '1.5rem' }}>
+            <div className="tags-cloud" style={{ marginBottom: '1.5rem', background: 'transparent', border: 'none', padding: 0 }}>
               {['Git', 'GitHub', 'VS Code', 'Docker'].map(tag => (
                 <Link 
                   key={tag} 
@@ -90,9 +89,11 @@ function Tags() {
                 </Link>
               ))}
             </div>
+          </div>
 
+          <div className="tags-category">
             <h3>Chủ đề</h3>
-            <div className="tags-cloud">
+            <div className="tags-cloud" style={{ background: 'transparent', border: 'none', padding: 0 }}>
               {['Cơ bản', 'Nâng cao', 'Project', 'Học tập', 'Productivity'].map(tag => (
                 <Link 
                   key={tag} 
@@ -103,12 +104,10 @@ function Tags() {
                 </Link>
               ))}
             </div>
-          </section>
-        </div>
-      </main>
-      
-      <Footer />
-    </>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
 

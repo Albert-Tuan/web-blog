@@ -1,8 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
-// Sample blog posts data (same as Blog.jsx)
+// Sample blog posts data
 const allPosts = [
   {
     id: 1,
@@ -98,63 +96,57 @@ function PostDetail() {
 
   if (!post) {
     return (
-      <>
-        <Header />
-        <main className="main-content">
-          <div className="container text-center">
-            <h1>404 - Không tìm thấy bài viết</h1>
-            <p>Bài viết bạn đang tìm kiếm không tồn tại.</p>
-            <Link to="/blog" className="read-more">← Quay lại danh sách bài viết</Link>
-          </div>
-        </main>
-        <Footer />
-      </>
+      <main className="main-content">
+        <div className="container text-center">
+          <h1>404 - Không tìm thấy bài viết</h1>
+          <p>Bài viết bạn đang tìm kiếm không tồn tại.</p>
+          <Link to="/blog" className="read-more">← Quay lại danh sách bài viết</Link>
+        </div>
+      </main>
     );
   }
 
   return (
-    <>
-      <Header />
-      
-      <main className="main-content">
-        <div className="container">
-          <article className="about-content" style={{ maxWidth: '800px' }}>
-            <Link to="/blog" className="read-more" style={{ marginBottom: '1rem', display: 'inline-block' }}>
-              ← Quay lại danh sách bài viết
-            </Link>
-            
+    <main className="main-content">
+      <div className="container">
+        <article className="post-detail fade-in">
+          <Link to="/blog" className="back-link">
+            ← Quay lại danh sách bài viết
+          </Link>
+          
+          <div className="post-detail-header">
             <h1>{post.title}</h1>
             
-            <p className="post-meta" style={{ marginLeft: 0 }}>
-              📅 {post.date} • 👤 {post.author}
+            <p className="post-meta">
+              <span>📅</span> {post.date}
+              <span className="separator">•</span>
+              <span>👤</span> {post.author}
             </p>
             
-            <div className="post-tags" style={{ marginLeft: 0, marginBottom: '1.5rem' }}>
+            <div className="post-tags">
               {post.tags.map((tag, index) => (
                 <span key={index} className="tag">{tag}</span>
               ))}
             </div>
-            
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
-            
-            <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px dashed var(--color-brown-light)' }} />
-            
-            <div className="text-center">
-              <p>Thích bài viết này? Chia sẻ nó!</p>
-              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer">
-                🐦 Twitter
-              </a>
-              {' • '}
-              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer">
-                📘 Facebook
-              </a>
-            </div>
-          </article>
-        </div>
-      </main>
-      
-      <Footer />
-    </>
+          </div>
+          
+          <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+          
+          <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px dashed var(--outline-variant)' }} />
+          
+          <div className="text-center">
+            <p className="label" style={{ marginBottom: '1rem' }}>Thích bài viết này? Chia sẻ nó!</p>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer">
+              🐦 Twitter
+            </a>
+            {' • '}
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer">
+              📘 Facebook
+            </a>
+          </div>
+        </article>
+      </div>
+    </main>
   );
 }
 
