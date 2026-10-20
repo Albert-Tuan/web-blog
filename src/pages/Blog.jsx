@@ -1,132 +1,150 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PostCard from '../components/PostCard';
-
-// Sample blog posts data
-const allPosts = [
-  {
-    id: 1,
-    title: 'Ngày đầu tiên với React.js',
-    date: '15/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Hôm nay tôi bắt đầu hành trình học React. Component, JSX, state... bao nhiêu thứ mới lạ!',
-    tags: ['React', 'JavaScript', 'Cơ bản']
-  },
-  {
-    id: 2,
-    title: 'CSS Flexbox không khó như bạn nghĩ',
-    date: '18/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Sau nhiều ngày vật lộn với float và grid, cuối cùng tôi cũng hiểu Flexbox rồi! Chia sẻ cách tôi học nó.',
-    tags: ['CSS', 'Flexbox', 'Layout']
-  },
-  {
-    id: 3,
-    title: 'Git & GitHub cho người mới bắt đầu',
-    date: '22/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Commit, push, pull, merge... Tưởng khó hoá ra dễ! Ghi chú lại những lệnh Git cơ bản tôi hay dùng.',
-    tags: ['Git', 'GitHub', 'Version Control']
-  },
-  {
-    id: 4,
-    title: 'Tự xây blog cá nhân với React',
-    date: '25/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Để ôn lại kiến thức, tôi quyết định làm một blog cá nhân. Và đây là nhật ký hành trình!',
-    tags: ['Project', 'React', 'Blog']
-  },
-  {
-    id: 5,
-    title: 'Học JavaScript qua 5 trò chơi nhỏ',
-    date: '28/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Không có gì thú vị hơn việc học code qua game! Giới thiệu 5 trang web giúp học JS một cách vui vẻ.',
-    tags: ['JavaScript', 'Game', 'Học tập']
-  },
-  {
-    id: 6,
-    title: 'Async/Await là gì vậy?',
-    date: '01/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Callback, Promise, Async/Await - trời ơi sao JavaScript có nhiều cách xử lý bất đồng bộ thế!',
-    tags: ['JavaScript', 'Async', 'Nâng cao']
-  },
-  {
-    id: 7,
-    title: 'Tìm hiểu về API và RESTful',
-    date: '05/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'GET, POST, PUT, DELETE - những HTTP methods cơ bản mà developer nào cũng cần biết.',
-    tags: ['API', 'REST', 'Backend']
-  },
-  {
-    id: 8,
-    title: '5 VS Code extensions giúp tôi code nhanh hơn',
-    date: '10/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Những extension không thể thiếu cho React developer: Prettier, ESLint, Auto Rename Tag...',
-    tags: ['VS Code', 'Tools', 'Productivity']
-  }
-];
+import { posts, allTagNames } from '../data/content';
 
 function Blog() {
-  const [selectedTag, setSelectedTag] = useState(null);
-  
-  // Get unique tags
-  const allTags = [...new Set(allPosts.flatMap(post => post.tags))].sort();
-  
-  // Filter posts by tag
-  const filteredPosts = selectedTag 
-    ? allPosts.filter(post => post.tags.includes(selectedTag))
-    : allPosts;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get('q') || '';
+  const activeTag = searchParams.get('tag') || null;
+
+  const tags = allTagNames();
+
+  let filtered = posts;
+
+  if (q.trim()) {
+    const lower = q.trim().toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.title.toLowerCase().includes(lower) ||
+        p.excerpt.toLowerCase().includes(lower) ||
+        p.tags.some((t) => t.toLowerCase().includes(lower)),
+    );
+  }
+
+  if (activeTag) {
+    filtered = filtered.filter((p) => p.tags.includes(activeTag));
+  }
+
+  const setTag = (tag) => {
+    const next = new URLSearchParams(searchParams);
+    if (tag) {
+      next.set('tag', tag);
+    } else {
+      next.delete('tag');
+    }
+    setSearchParams(next);
+  };
 
   return (
-    <main className="main-content">
-      <div className="container">
-        <section className="page-header">
-          <h1>📝 Tất cả bài viết</h1>
-          <p className="subtitle">{allPosts.length} bài viết • Cập nhật liên tục</p>
-        </section>
+    <div className="max-w-[1120px] mx-auto w-full px-gutter py-space-lg flex flex-col gap-space-xl">
+      {/* Page header */}
+      <div className="relative bg-surface-container-low rounded-xl p-space-xl shadow-paper overflow-hidden">
+        <div className="absolute -right-8 -top-8 w-44 h-44 bg-primary-fixed/30 blur-2xl pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-space-sm mb-space-xs">
+            <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-widest bg-tertiary-fixed/60 px-space-xs py-0.5 rounded">
+              Mục lục sổ tay § Index
+            </span>
+          </div>
+          <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-space-xs">
+            📝 Tất cả bài viết
+          </h1>
+          <p className="font-body-lg text-body-lg text-on-surface-variant italic">
+            {posts.length} bài viết — tất cả được ghi chép cẩn thận
+          </p>
+        </div>
+      </div>
 
-        {/* Tag Filter */}
-        <div className="tags-cloud mb-xl fade-in">
-          <button 
-            className={`tag-item ${!selectedTag ? 'active' : ''}`}
-            onClick={() => setSelectedTag(null)}
-            style={{
-              background: !selectedTag ? 'var(--primary-container)' : undefined,
-              color: !selectedTag ? 'var(--on-primary-container)' : undefined
+      {/* Search + filter bar */}
+      <div className="flex flex-col gap-space-md">
+        {/* Search input */}
+        <div className="relative max-w-md">
+          <label className="sr-only" htmlFor="blog-search">
+            Tìm kiếm bài viết
+          </label>
+          <input
+            id="blog-search"
+            type="search"
+            value={q}
+            onChange={(e) => {
+              const next = new URLSearchParams(searchParams);
+              if (e.target.value) {
+                next.set('q', e.target.value);
+              } else {
+                next.delete('q');
+              }
+              setSearchParams(next);
             }}
+            placeholder="Tìm trong sổ tay…"
+            className="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-10 pr-space-md py-2.5 font-label-md text-label-md text-on-surface placeholder:text-outline/80 focus:outline-none focus:bg-surface-container focus:border-primary-container transition-all"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-outline pointer-events-none">
+            search
+          </span>
+        </div>
+
+        {/* Tag filter pills */}
+        <div className="flex flex-wrap items-center gap-space-xs">
+          <button
+            onClick={() => setTag(null)}
+            className={`px-space-sm py-1.5 rounded font-label-sm text-label-sm transition-all ${
+              !activeTag
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+            }`}
           >
             Tất cả
           </button>
-          {allTags.map(tag => (
+          {tags.map((tag) => (
             <button
               key={tag}
-              className={`tag-item ${selectedTag === tag ? 'active' : ''}`}
-              onClick={() => setSelectedTag(tag)}
-              style={{
-                background: selectedTag === tag ? 'var(--primary-container)' : undefined,
-                color: selectedTag === tag ? 'var(--on-primary-container)' : undefined
-              }}
+              onClick={() => setTag(tag === activeTag ? null : tag)}
+              className={`px-space-sm py-1.5 rounded font-label-sm text-label-sm transition-all ${
+                tag === activeTag
+                  ? 'bg-primary text-on-primary shadow-sm'
+                  : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+              }`}
             >
               {tag}
             </button>
           ))}
         </div>
 
-        {/* Posts Grid */}
-        <div className="blog-grid">
-          {filteredPosts.map(post => (
-            <PostCard key={post.id} post={post} />
+        {/* Result count */}
+        <p className="font-label-sm text-label-sm text-on-surface-variant">
+          Hiển thị {filtered.length} / {posts.length} mục ghi
+          {activeTag && <span> — tag: <strong>{activeTag}</strong></span>}
+        </p>
+      </div>
+
+      {/* Grid */}
+      {filtered.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+          {filtered.map((post, i) => (
+            <PostCard key={post.id} post={post} index={i} />
           ))}
         </div>
-
-        {filteredPosts.length === 0 && (
-          <p className="text-center">Không có bài viết nào với tag này.</p>
-        )}
-      </div>
-    </main>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-space-xl gap-space-md text-center">
+          <span className="material-symbols-outlined text-[48px] text-outline">search_off</span>
+          <p className="font-headline-sm text-headline-sm text-on-surface">
+            Không tìm thấy mục ghi nào
+          </p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant italic">
+            Thử từ khoá khác hoặc xoá bộ lọc tag
+          </p>
+          <button
+            onClick={() => {
+              setSearchParams({});
+            }}
+            className="mt-space-sm bg-primary-container text-on-primary-container font-label-md text-label-md px-space-lg py-2 rounded hover:bg-primary hover:text-on-primary transition-all"
+          >
+            Xoá bộ lọc
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
