@@ -1,110 +1,39 @@
-import { useParams, Link } from 'react-router-dom';
-
-// Sample blog posts data
-const allPosts = [
-  {
-    id: 1,
-    title: 'Ngày đầu tiên với React.js',
-    date: '15/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Hôm nay tôi bắt đầu hành trình học React. Component, JSX, state... bao nhiêu thứ mới lạ!',
-    tags: ['React', 'JavaScript', 'Cơ bản'],
-    content: `
-      <p>Hôm nay là ngày đầu tiên tôi bắt đầu học React.js, và tôi đã học được rất nhiều thứ!</p>
-      
-      <h3>1. Component là gì?</h3>
-      <p>Component là một khối UI có thể tái sử dụng. Giống như một "viên gạch" để xây dựng giao diện. Mỗi component có thể chứa logic riêng và giao diện riêng.</p>
-      
-      <h3>2. JSX - Kết hợp JS và HTML</h3>
-      <p>JSX cho phép chúng ta viết HTML trong JavaScript. Trông có vẻ lạ lúc đầu, nhưng sau đó tôi nhận ra nó rất tiện lợi!</p>
-      
-      <h3>3. State và Props</h3>
-      <p>State là dữ liệu nội bộ của component, còn Props là dữ liệu được truyền vào từ bên ngoài. Hiểu được sự khác nhau này là chìa khóa để học React.</p>
-      
-      <h3>Kết luận</h3>
-      <p>Ngày đầu tiên với React khá thú vị. Tôi đã tạo được component đầu tiên và hiểu được cách React quản lý giao diện. Looking forward to learning more!</p>
-    `
-  },
-  {
-    id: 2,
-    title: 'CSS Flexbox không khó như bạn nghĩ',
-    date: '18/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Sau nhiều ngày vật lộn với float và grid, cuối cùng tôi cũng hiểu Flexbox rồi!',
-    tags: ['CSS', 'Flexbox', 'Layout'],
-    content: `<p>Nội dung chi tiết về Flexbox...</p>`
-  },
-  {
-    id: 3,
-    title: 'Git & GitHub cho người mới bắt đầu',
-    date: '22/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Commit, push, pull, merge... Tưởng khó hoá ra dễ!',
-    tags: ['Git', 'GitHub', 'Version Control'],
-    content: `<p>Nội dung chi tiết về Git...</p>`
-  },
-  {
-    id: 4,
-    title: 'Tự xây blog cá nhân với React',
-    date: '25/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Để ôn lại kiến thức, tôi quyết định làm một blog cá nhân.',
-    tags: ['Project', 'React', 'Blog'],
-    content: `<p>Nội dung chi tiết về project blog...</p>`
-  },
-  {
-    id: 5,
-    title: 'Học JavaScript qua 5 trò chơi nhỏ',
-    date: '28/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Không có gì thú vị hơn việc học code qua game!',
-    tags: ['JavaScript', 'Game', 'Học tập'],
-    content: `<p>Nội dung chi tiết về games...</p>`
-  },
-  {
-    id: 6,
-    title: 'Async/Await là gì vậy?',
-    date: '01/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Callback, Promise, Async/Await - JavaScript xử lý bất đồng bộ như thế nào?',
-    tags: ['JavaScript', 'Async', 'Nâng cao'],
-    content: `<p>Nội dung chi tiết về Async/Await...</p>`
-  },
-  {
-    id: 7,
-    title: 'Tìm hiểu về API và RESTful',
-    date: '05/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'GET, POST, PUT, DELETE - những HTTP methods cơ bản.',
-    tags: ['API', 'REST', 'Backend'],
-    content: `<p>Nội dung chi tiết về API...</p>`
-  },
-  {
-    id: 8,
-    title: '5 VS Code extensions giúp tôi code nhanh hơn',
-    date: '10/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Những extension không thể thiếu cho React developer.',
-    tags: ['VS Code', 'Tools', 'Productivity'],
-    content: `<p>Nội dung chi tiết về VS Code extensions...</p>`
-  }
-];
+import { useCallback, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
+import { postsApi, formatPostDate } from '../api/posts';
+import { apiError } from '../api/client';
+import { useApi } from '../hooks/useApi';
+import ApiStatus from '../components/ApiStatus';
 
 function PostDetail() {
   const { id } = useParams();
-  const post = allPosts.find(p => p.id === parseInt(id));
+  const navigate = useNavigate();
+  const loader = useCallback(signal => postsApi.get(id, signal), [id]);
+  const state = useApi(loader);
+  const post = state.data;
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
-  if (!post) {
-    return (
-      <main className="main-content">
-        <div className="container text-center">
-          <h1>404 - Không tìm thấy bài viết</h1>
-          <p>Bài viết bạn đang tìm kiếm không tồn tại.</p>
-          <Link to="/blog" className="read-more">← Quay lại danh sách bài viết</Link>
-        </div>
-      </main>
-    );
+  async function remove() {
+    if (deleting || !window.confirm(`Xóa bài viết “${post.title}”?`)) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await postsApi.remove(id);
+      navigate('/blog');
+    } catch (error) {
+      setDeleteError(apiError(error));
+      setDeleting(false);
+    }
   }
+
+  if (!post) return (
+    <main className="main-content"><div className="container">
+      <ApiStatus {...state} />
+      <Link to="/blog">← Quay lại danh sách bài viết</Link>
+    </div></main>
+  );
 
   return (
     <main className="main-content">
@@ -114,11 +43,16 @@ function PostDetail() {
             ← Quay lại danh sách bài viết
           </Link>
           
+          <div className="post-actions">
+            <Link to={`/blog/${id}/edit`}>Sửa bài viết</Link>
+            <button type="button" disabled={deleting} onClick={remove}>{deleting ? 'Đang xóa…' : 'Xóa bài viết'}</button>
+          </div>
+          {deleteError && <p role="alert" className="api-error">{deleteError}</p>}
           <div className="post-detail-header">
             <h1>{post.title}</h1>
             
             <p className="post-meta">
-              <span>📅</span> {post.date}
+              <span>📅</span> {formatPostDate(post.publishedAt)}
               <span className="separator">•</span>
               <span>👤</span> {post.author}
             </p>
@@ -130,7 +64,7 @@ function PostDetail() {
             </div>
           </div>
           
-          <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div className="post-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true } }) }} />
           
           <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px dashed var(--outline-variant)' }} />
           

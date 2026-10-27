@@ -1,3 +1,4 @@
+import { formatPostDate } from '../api/posts';
 import { Link } from 'react-router-dom';
 
 function PostCard({ post }) {
@@ -6,7 +7,7 @@ function PostCard({ post }) {
       <div className="post-card-header">
         <h3>{post.title}</h3>
         <p className="post-meta">
-          <span>📅</span> {post.date}
+          <span>📅</span> {formatPostDate(post.publishedAt)}
           <span className="separator">•</span>
           <span>👤</span> {post.author}
         </p>

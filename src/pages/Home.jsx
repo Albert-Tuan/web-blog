@@ -1,58 +1,11 @@
+import { postsApi } from '../api/posts';
+import { useApi } from '../hooks/useApi';
+import ApiStatus from '../components/ApiStatus';
 import PostCard from '../components/PostCard';
 
-// Sample blog posts data
-const samplePosts = [
-  {
-    id: 1,
-    title: 'Ngày đầu tiên với React.js',
-    date: '15/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Hôm nay tôi bắt đầu hành trình học React. Component, JSX, state... bao nhiêu thứ mới lạ!',
-    tags: ['React', 'JavaScript', 'Cơ bản']
-  },
-  {
-    id: 2,
-    title: 'CSS Flexbox không khó như bạn nghĩ',
-    date: '18/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Sau nhiều ngày vật lộn với float và grid, cuối cùng tôi cũng hiểu Flexbox rồi! Chia sẻ cách tôi học nó.',
-    tags: ['CSS', 'Flexbox', 'Layout']
-  },
-  {
-    id: 3,
-    title: 'Git & GitHub cho người mới bắt đầu',
-    date: '22/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Commit, push, pull, merge... Tưởng khó hoá ra dễ! Ghi chú lại những lệnh Git cơ bản tôi hay dùng.',
-    tags: ['Git', 'GitHub', 'Version Control']
-  },
-  {
-    id: 4,
-    title: 'Tự xây blog cá nhân với React',
-    date: '25/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Để ôn lại kiến thức, tôi quyết định làm một blog cá nhân. Và đây là nhật ký hành trình!',
-    tags: ['Project', 'React', 'Blog']
-  },
-  {
-    id: 5,
-    title: 'Học JavaScript qua 5 trò chơi nhỏ',
-    date: '28/10/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Không có gì thú vị hơn việc học code qua game! Giới thiệu 5 trang web giúp học JS một cách vui vẻ.',
-    tags: ['JavaScript', 'Game', 'Học tập']
-  },
-  {
-    id: 6,
-    title: 'Async/Await là gì vậy?',
-    date: '01/11/2024',
-    author: 'Albert Tuan',
-    excerpt: 'Callback, Promise, Async/Await - trời ơi sao JavaScript có nhiều cách xử lý bất đồng bộ thế!',
-    tags: ['JavaScript', 'Async', 'Nâng cao']
-  }
-];
-
 function Home() {
+  const state = useApi(postsApi.list);
+  const posts = state.data || [];
   return (
     <main className="main-content">
       <div className="container">
@@ -69,8 +22,10 @@ function Home() {
         {/* Latest Posts */}
         <section className="mb-xl">
           <h2 className="text-center mb-lg">📌 Bài viết mới nhất</h2>
+          <ApiStatus {...state} />
+          {!state.loading && !state.error && posts.length === 0 && <p>Chưa có bài viết.</p>}
           <div className="blog-grid">
-            {samplePosts.slice(0, 3).map(post => (
+            {posts.slice(0, 3).map(post => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>

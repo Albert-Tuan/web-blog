@@ -30,3 +30,22 @@ npm-debug.log*
 
 # Testing
 coverage/
+
+# ASP.NET Core / local database
+**/bin/
+**/obj/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+TestResults/
+__pycache__/
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Download package extras
+/implementation.patch
+/IMPLEMENTATION-NOTES.txt

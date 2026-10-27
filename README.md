@@ -1,43 +1,65 @@
-# 📔 Nhật Ký Lập Trình
+```markdown
+# Nhật Ký Lập Trình — DevDiary
 
-Blog cá nhân ghi lại hành trình tự học lập trình từ con số 0.
+Blog cá nhân ghi lại hành trình tự học lập trình từ con số 0, kèm công cụ quản lý việc học: lộ trình, sổ tay lỗi, snippet code và theo dõi tiến độ mỗi ngày.
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
-## 🎯 Giới thiệu
+## Giới thiệu
 
-Đây là blog cá nhân của tôi, nơi tôi ghi lại:
-- Những bài học về lập trình web (React, JavaScript, CSS...)
-- Các dự án nhỏ đã hoàn thành
-- Những lỗi sai và cách khắc phục
-- Tips & tricks cho developers
+Đây là blog cá nhân của tôi — nơi tôi ghi lại hành trình tự học lập trình và đồng thời dùng chính blog này như một **công cụ học tập cá nhân**. Không chỉ để đọc, website còn giúp tôi:
 
-## 🛠️ Công nghệ sử dụng
+- Ghi lại **nhật ký học tập** mỗi ngày: hôm nay học gì, làm gì, gặp khó khăn gì.
+- Viết và chia sẻ **bài viết kinh nghiệm** về lập trình web (React, JavaScript, CSS...).
+- Lưu lại các **dự án nhỏ** đã hoàn thành.
+- Ghi lại **lỗi sai và cách khắc phục** để tra cứu lại khi gặp lỗi tương tự.
+- Lưu **snippet code** tái sử dụng, phân loại theo ngôn ngữ.
+- Chia sẻ **tips & tricks** cho developers.
+
+## Công nghệ sử dụng
 
 - **Frontend**: React.js + Vite
-- **Routing**: React Router v6
+- **Routing**: React Router v7
 - **Styling**: CSS3 (Retro/Vintage style)
-- **Deploy**: GitHub Pages
+- **Backend**: ASP.NET Core 10 controllers + EF Core 10 + SQLite
+- **HTTP client**: Axios
+- **Deploy**: Frontend có thể host tĩnh; backend cần host ASP.NET Core riêng
 
-## 🚀 Cách chạy project
+## Chạy full-stack (React + ASP.NET Core + EF Core)
+
+Yêu cầu .NET SDK 10 và Node.js 24. Backend dùng SQLite, không cần dịch vụ database riêng.
+
+Terminal 1, từ thư mục gốc:
 
 ```bash
-# Clone repository
-git clone https://github.com/Albert-Tuan/web-blog.git
-cd web-blog
+dotnet tool restore
+dotnet ef database update --project backend/WebBlog.Api
+dotnet run --project backend/WebBlog.Api --launch-profile http
+```
 
-# Install dependencies
-npm install
+Terminal 2, từ thư mục gốc:
 
-# Chạy development server
+```bash
+npm ci
+cp .env.example .env
 npm run dev
 ```
 
-Truy cập http://localhost:5173 để xem website.
+Mở http://localhost:5173/blog. API: http://localhost:5080/api/posts.
+Tạo bài viết tại `/blog/new`, sửa/xóa tại trang chi tiết. Tám bài viết mẫu được giữ trong database qua migration.
 
-## 📂 Cấu trúc thư mục
+**[Hướng dẫn tiếng Việt: Controllers, Axios, database và EF migrations](docs/ASP-NET-CORE-EF-CORE.vi.md)**
+
+Kiểm tra: `npm run lint`, `npm run build`, `python3 scripts/smoke-api.py`.
+Smoke test tự tạo database tạm để kiểm thử HTTP CRUD, migration, validation, CORS và persistence.
+
+Bản thực hành chưa có đăng nhập. Các thao tác ghi chỉ bật ở Development và API mặc định lắng nghe localhost. Cần thêm xác thực/phân quyền trước khi dùng công khai. GitHub Pages chỉ host frontend; API cần môi trường chạy ASP.NET Core riêng.
+
+## Cấu trúc thư mục
 
 ```
 src/
@@ -49,20 +71,22 @@ src/
 └── index.css       # Global styles
 ```
 
-## 🌐 Các trang trong website
+## Các trang trong website
 
 | Route | Mô tả |
 |-------|--------|
 | `/` | Trang chủ |
 | `/about` | Giới thiệu về blog |
 | `/blog` | Danh sách tất cả bài viết |
-| `/blog/:id` | Chi tiết bài viết |
+| `/blog/:id` | Chi tiết bài viết và xóa |
+| `/blog/new` | Tạo bài viết (POST) |
+| `/blog/:id/edit` | Sửa bài viết (PUT) |
 | `/tags` | Trang danh sách tags |
 | `/contact` | Trang liên hệ |
 
-## 📝 React Router
+## React Router
 
-Project sử dụng React Router v6 để quản lý navigation:
+Project sử dụng React Router v7 để quản lý navigation:
 
 ```jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -83,7 +107,7 @@ function App() {
 }
 ```
 
-## 🎨 Design
+## Design
 
 Blog có phong cách **Retro/Vintage** với:
 - Màu sắc ấm áp (nâu, kem, vàng nhạt)
@@ -91,12 +115,23 @@ Blog có phong cách **Retro/Vintage** với:
 - Hiệu ứng giấy ruled như sổ tay
 - Border và shadow mềm mại
 
-## 👤 Tác giả
+## Định hướng mở rộng
+
+Các module dưới đây thuộc phạm vi ý tưởng đề tài và sẽ được bổ sung sau khi hoàn thiện phần blog + CRUD hiện tại:
+
+- **Nhật ký học tập**: entry theo ngày, chế độ private/public.
+- **Lộ trình học**: milestone + task, theo dõi % tiến độ, chia sẻ công khai.
+- **Sổ tay lỗi**: lưu lỗi + cách sửa, gắn tag, tìm kiếm lại.
+- **Snippet code**: lưu đoạn code tái sử dụng, phân loại theo ngôn ngữ.
+- **Theo dõi tiến độ**: streak, giờ học, biểu đồ tuần/tháng.
+- **Xác thực & phân quyền**: đăng nhập, phân biệt User / Admin trước khi dùng công khai.
+
+## Tác giả
 
 **Albert Tuan**
 - GitHub: [@Albert-Tuan](https://github.com/Albert-Tuan)
 
-## 📄 License
+## License
 
 MIT License - feel free to use for your own blog!
 

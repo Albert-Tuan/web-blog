@@ -5,6 +5,7 @@ import Blog from './pages/Blog';
 import Tags from './pages/Tags';
 import Contact from './pages/Contact';
 import PostDetail from './pages/PostDetail';
+import PostEditor from './pages/PostEditor';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './index.css';
@@ -24,6 +25,8 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         
         {/* Single post page - http://localhost:5173/blog/:id */}
+        <Route path="/blog/new" element={<PostEditor />} />
+        <Route path="/blog/:id/edit" element={<PostEditor />} />
         <Route path="/blog/:id" element={<PostDetail />} />
         
         {/* Tags page - http://localhost:5173/tags */}
