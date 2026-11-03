@@ -5,10 +5,12 @@ import { postsApi, formatPostDate } from '../api/posts';
 import { apiError } from '../api/client';
 import { useApi } from '../hooks/useApi';
 import ApiStatus from '../components/ApiStatus';
+import { useAuth } from '../auth/AuthContext';
 
 function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const loader = useCallback(signal => postsApi.get(id, signal), [id]);
   const state = useApi(loader);
   const post = state.data;
@@ -43,10 +45,10 @@ function PostDetail() {
             ← Quay lại danh sách bài viết
           </Link>
           
-          <div className="post-actions">
+          {isAuthenticated && post.authorId === user.id && <div className="post-actions">
             <Link to={`/blog/${id}/edit`}>Sửa bài viết</Link>
             <button type="button" disabled={deleting} onClick={remove}>{deleting ? 'Đang xóa…' : 'Xóa bài viết'}</button>
-          </div>
+          </div>}
           {deleteError && <p role="alert" className="api-error">{deleteError}</p>}
           <div className="post-detail-header">
             <h1>{post.title}</h1>

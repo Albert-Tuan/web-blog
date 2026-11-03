@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 function Header() {
   const location = useLocation();
+  const { user, isAuthenticated, status } = useAuth();
   
   return (
     <header className="header">
@@ -13,6 +15,11 @@ function Header() {
             <span>Hành trình tự học code</span>
           </div>
         </Link>
+        <div className="auth-nav" aria-label="Tài khoản">
+          {status === 'loading' ? <span role="status">Đang kiểm tra phiên…</span> : isAuthenticated ? (
+            <Link to="/account">{user.email}</Link>
+          ) : <><Link to="/login">Đăng nhập</Link><Link to="/register">Đăng ký</Link></>}
+        </div>
       </div>
       
       <nav className="navbar">

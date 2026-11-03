@@ -1,5 +1,7 @@
 # Thực hành ASP.NET Core API + Axios + EF Core với web-blog
 
+> Project đã bổ sung đăng ký/đăng nhập. Xem [AUTH-FLOW.vi.md](AUTH-FLOW.vi.md) cho cấu hình xác thực và cách gọi API ghi có cookie/CSRF.
+
 ## 1. Những gì thay đổi
 
 Trước đây `Home.jsx`, `Blog.jsx`, `PostDetail.jsx` có các mảng bài viết riêng và `Tags.jsx` có số lượng giả lập. Hiện tại tất cả đọc cùng một database thông qua API. Tám bài viết cũ được giữ trong migration đầu tiên. Trang `/blog/new` dùng POST, `/blog/:id/edit` dùng PUT, nút xóa ở trang chi tiết dùng DELETE; các trang đọc dữ liệu dùng GET.
@@ -113,33 +115,27 @@ SQLite không cần username/password. Nếu sau này dùng SQL Server/PostgreSQ
 | DELETE | `/api/posts/{id}` | 204, không có body | Xóa |
 | GET | `/api/tags` | 200 + `{name, count}[]` | Thống kê từ bài viết thực tế |
 
-ID không tồn tại trả 404; input không hợp lệ trả 400 kèm `errors`. POST/PUT không nhận `id` hoặc `publishedAt` để ghi: server tạo ID và thời gian UTC, PUT giữ ngày đăng gốc. Các trường title/author/excerpt/content bắt buộc; tối đa 10 tag, mỗi tag 1–40 ký tự; tag trùng trong cùng bài được gộp không phân biệt hoa/thường.
+ID không tồn tại trả 404; input không hợp lệ trả 400 kèm `errors`. POST/PUT không nhận `id`, `author`, `authorId` hoặc `publishedAt` để ghi: server tạo ID và thời gian UTC, PUT giữ ngày đăng gốc. Các trường title/excerpt/content bắt buộc; tối đa 10 tag, mỗi tag 1–40 ký tự; tag trùng trong cùng bài được gộp không phân biệt hoa/thường.
 
 Ví dụ body POST/PUT:
 
 ```json
 {
   "title": "Học ASP.NET Core",
-  "author": "Albert Tuan",
   "excerpt": "Kết nối React với API và SQLite.",
   "content": "<h2>Bài học đầu tiên</h2><p>Tôi đã tạo được API CRUD.</p>",
   "tags": ["ASP.NET Core", "EF Core"]
 }
 ```
 
-Ví dụ kiểm tra nhanh:
+Ví dụ kiểm tra GET:
 
 ```bash
 curl http://localhost:5080/api/posts
-curl -i -X POST http://localhost:5080/api/posts \
-  -H 'Content-Type: application/json' \
-  -d '{"title":"Bài thử","author":"Tuan","excerpt":"Tóm tắt","content":"<p>Nội dung</p>","tags":["API"]}'
-# Lấy ID từ response POST, thay vào số 9 bên dưới nếu ID khác.
-curl -i -X PUT http://localhost:5080/api/posts/9 \
-  -H 'Content-Type: application/json' \
-  -d '{"title":"Đã sửa","author":"Tuan","excerpt":"Tóm tắt mới","content":"<p>Nội dung mới</p>","tags":["EF Core"]}'
-curl -i -X DELETE http://localhost:5080/api/posts/9
+
 ```
+
+Các request POST/PUT/DELETE cần cookie đăng nhập và CSRF token. Dùng giao diện đã tích hợp hoặc xem `scripts/smoke-api.py` để kiểm tra với cookie jar.
 
 ## 6. Axios ở frontend
 
@@ -149,6 +145,7 @@ Cài bằng `npm install axios` (dependency đã nằm trong project). Tạo m�
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5080/api',
   timeout: 10000,
+  withCredentials: true,
 });
 ```
 
@@ -210,7 +207,7 @@ npm run build
 python3 scripts/smoke-api.py
 ```
 
-Smoke test dùng database tạm: build, kiểm tra model/snapshot, apply/reapply migration, CRUD, validation, CORS, persistence sau restart, chặn ghi ở Production, rồi rollback và apply lại. Không đụng `webblog.db` của bạn.
+Smoke test dùng database tạm: build, kiểm tra model/snapshot, apply/reapply migration, CRUD, validation, CORS, persistence sau restart, authentication, session, quyền sở hữu và CSRF, rồi rollback và apply lại. Không đụng `webblog.db` của bạn.
 
 Mở DevTools → Network, quan sát GET khi vào blog, POST khi tạo, PUT khi sửa, DELETE khi xóa. Kiểm tra response code/body; thử bỏ trống tiêu đề, ngắt API, truy cập ID không tồn tại và nhấn Thử lại.
 
@@ -221,12 +218,12 @@ Mở DevTools → Network, quan sát GET khi vào blog, POST khi tạo, PUT khi 
 | `no such table: Posts` | Chạy `dotnet ef database update`, kiểm tra connection string giống khi chạy API |
 | Frontend báo không kết nối API | API đang chạy cổng 5080, URL `.env`, CORS và Vite cổng 5173 |
 | 400 khi lưu | Xem `errors` trong response; kiểm tra trường bắt buộc và giới hạn tag |
-| 403 khi tạo/sửa/xóa | Chạy launch profile `http` để thực hành ở Development |
+| 401 / 403 khi tạo/sửa/xóa | Đăng nhập trước; chỉ chủ bài được sửa/xóa; bài mẫu chưa có chủ |
 | Tags không còn số lượng cũ | Số lượng hiện được tính thật từ database |
 
 ## 9. Phạm vi bản thực hành
 
-Đây là CRUD local, chưa có tài khoản/đăng nhập/phân quyền. `DevelopmentWriteAttribute` chặn POST/PUT/DELETE ngoài Development. Không đưa API lên Internet với môi trường Development; để dùng thật cần authentication, authorization cho chủ blog, HTTPS và cấu hình hosting/database phù hợp. Việc chặn theo môi trường không thay thế phân quyền.
+Project hiện có đăng ký/đăng nhập bằng cookie và quyền sở hữu bài viết. `DevelopmentWriteAttribute` đã được thay bằng `[Authorize]` và kiểm tra AuthorId. Các request ghi cần CSRF token; xem [AUTH-FLOW.vi.md](AUTH-FLOW.vi.md). Production cần HTTPS và cấu hình key ring/hosting phù hợp.
 
 GET hiện trả toàn bộ bài viết và nội dung; phù hợp dữ liệu nhỏ của bài học. Blog lớn nên thêm phân trang, tách DTO danh sách/chi tiết và truy vấn tag phù hợp. Trang Liên hệ vẫn là phần giao diện hiện có, chưa có API gửi email. GitHub Pages chỉ phục vụ frontend tĩnh; backend ASP.NET Core cần host riêng và cấu hình URL API khi build frontend.
 

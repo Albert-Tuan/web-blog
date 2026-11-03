@@ -3,6 +3,7 @@ namespace WebBlog.Api.Models;
 public class Post
 {
     public int Id { get; set; }
+    public int? AuthorId { get; set; }
     public string Title { get; set; } = "";
     public string Excerpt { get; set; } = "";
     public string Content { get; set; } = "";
