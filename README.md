@@ -37,6 +37,7 @@ Terminal 1, từ thư mục gốc:
 
 ```bash
 dotnet tool restore
+dotnet restore backend/WebBlog.Api
 dotnet ef database update --project backend/WebBlog.Api
 dotnet run --project backend/WebBlog.Api --launch-profile http
 ```
@@ -50,14 +51,18 @@ npm run dev
 ```
 
 Mở http://localhost:5173/blog. API: http://localhost:5080/api/posts.
-Tạo bài viết tại `/blog/new`, sửa/xóa tại trang chi tiết. Tám bài viết mẫu được giữ trong database qua migration.
+Đăng ký tại `/register`, đăng nhập tại `/login`, xem tài khoản/đăng xuất tại `/account`.
+User đăng nhập được tạo bài tại `/blog/new` và sửa/xóa bài của mình. Tám bài viết mẫu được giữ trong database qua migration và chỉ đọc vì chưa có chủ sở hữu.
+
+**[Bài tập đăng ký/đăng nhập: Context, localStorage, database và phân quyền CRUD](docs/AUTH-FLOW.vi.md)**
 
 **[Hướng dẫn tiếng Việt: Controllers, Axios, database và EF migrations](docs/ASP-NET-CORE-EF-CORE.vi.md)**
 
 Kiểm tra: `npm run lint`, `npm run build`, `python3 scripts/smoke-api.py`.
-Smoke test tự tạo database tạm để kiểm thử HTTP CRUD, migration, validation, CORS và persistence.
+Smoke test tự tạo database tạm để kiểm thử HTTP CRUD, auth, session, CSRF, quyền sở hữu và migration.
+Kiểm thử trình duyệt: `npx playwright install chromium`, sau đó `npm run test:browser` (API/Vite/database tạm được tạo tự động).
 
-Bản thực hành chưa có đăng nhập. Các thao tác ghi chỉ bật ở Development và API mặc định lắng nghe localhost. Cần thêm xác thực/phân quyền trước khi dùng công khai. GitHub Pages chỉ host frontend; API cần môi trường chạy ASP.NET Core riêng.
+Xác thực dùng cookie HttpOnly + session trong database; React Context/localStorage chỉ giữ thông tin user. Password được hash, các request ghi có CSRF protection, sửa/xóa bài kiểm tra chủ sở hữu. Production cần HTTPS và Data Protection key ring bền vững. Chưa có xác minh email hoặc quên mật khẩu. GitHub Pages chỉ host frontend; API cần môi trường chạy ASP.NET Core riêng.
 
 ## Cấu trúc thư mục
 
@@ -83,6 +88,9 @@ src/
 | `/blog/:id/edit` | Sửa bài viết (PUT) |
 | `/tags` | Trang danh sách tags |
 | `/contact` | Trang liên hệ |
+| `/register` | Đăng ký và đăng nhập tự động |
+| `/login` | Đăng nhập |
+| `/account` | Tài khoản và đăng xuất |
 
 ## React Router
 

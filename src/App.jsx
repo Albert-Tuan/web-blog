@@ -6,6 +6,9 @@ import Tags from './pages/Tags';
 import Contact from './pages/Contact';
 import PostDetail from './pages/PostDetail';
 import PostEditor from './pages/PostEditor';
+import AuthPage from './pages/AuthPage';
+import Account from './pages/Account';
+import RequireAuth from './auth/RequireAuth';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './index.css';
@@ -15,6 +18,9 @@ function App() {
     <BrowserRouter>
       <Header />
       <Routes>
+        <Route path="/login" element={<AuthPage key="login" mode="login" />} />
+        <Route path="/register" element={<AuthPage key="register" mode="register" />} />
+        <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
         {/* Home page - http://localhost:5173/ */}
         <Route path="/" element={<Home />} />
         
@@ -25,8 +31,8 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         
         {/* Single post page - http://localhost:5173/blog/:id */}
-        <Route path="/blog/new" element={<PostEditor />} />
-        <Route path="/blog/:id/edit" element={<PostEditor />} />
+        <Route path="/blog/new" element={<RequireAuth><PostEditor /></RequireAuth>} />
+        <Route path="/blog/:id/edit" element={<RequireAuth><PostEditor /></RequireAuth>} />
         <Route path="/blog/:id" element={<PostDetail />} />
         
         {/* Tags page - http://localhost:5173/tags */}

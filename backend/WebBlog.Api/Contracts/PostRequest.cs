@@ -11,8 +11,6 @@ public class PostRequest : IValidatableObject
     public string Excerpt { get; set; } = "";
     [Required, StringLength(100000)]
     public string Content { get; set; } = "";
-    [Required, StringLength(100)]
-    public string Author { get; set; } = "";
     [Required, MaxLength(10)]
     public List<string> Tags { get; set; } = [];
 

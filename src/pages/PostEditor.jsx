@@ -4,8 +4,9 @@ import { postsApi } from '../api/posts';
 import { apiError } from '../api/client';
 import { useApi } from '../hooks/useApi';
 import ApiStatus from '../components/ApiStatus';
+import { useAuth } from '../auth/AuthContext';
 
-const emptyPost = { title: '', excerpt: '', content: '', author: 'Albert Tuan', tags: [] };
+const emptyPost = { title: '', excerpt: '', content: '', tags: [] };
 
 function PostForm({ post, id }) {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ function PostForm({ post, id }) {
     setSaving(true);
     setError('');
     const payload = {
-      title: form.title.trim(), author: form.author.trim(), excerpt: form.excerpt.trim(),
+      title: form.title.trim(), excerpt: form.excerpt.trim(),
       content: form.content.trim(), tags: form.tags.split(',').map(tag => tag.trim()).filter(Boolean),
     };
     try {
@@ -40,8 +41,6 @@ function PostForm({ post, id }) {
       <fieldset disabled={saving}>
         <label htmlFor="title">Tiêu đề</label>
         <input id="title" name="title" required maxLength={200} value={form.title} onChange={change} />
-        <label htmlFor="author">Tác giả</label>
-        <input id="author" name="author" required maxLength={100} value={form.author} onChange={change} />
         <label htmlFor="excerpt">Tóm tắt</label>
         <textarea id="excerpt" name="excerpt" required maxLength={500} rows={3} value={form.excerpt} onChange={change} />
         <label htmlFor="content">Nội dung (hỗ trợ HTML cơ bản)</label>
@@ -60,14 +59,17 @@ function PostForm({ post, id }) {
 
 export default function PostEditor() {
   const { id } = useParams();
+  const { user } = useAuth();
   const loader = useCallback(signal => id ? postsApi.get(id, signal) : Promise.resolve(emptyPost), [id]);
   const state = useApi(loader);
   return (
     <main className="main-content"><div className="container">
       <h1>{id ? 'Sửa bài viết' : 'Tạo bài viết'}</h1>
-      <p>Bài thực hành CRUD — chức năng ghi chạy với API ở môi trường Development.</p>
+      <p>Tác giả: {user.email}</p>
       <ApiStatus {...state} />
-      {state.data && <PostForm key={id || 'new'} post={state.data} id={id} />}
+      {state.data && (id && state.data.authorId !== user.id
+        ? <p role="alert">Bạn chỉ được sửa bài viết do mình tạo. <Link to="/blog">Quay lại blog</Link></p>
+        : <PostForm key={id || 'new'} post={state.data} id={id} />)}
     </div></main>
   );
 }
